@@ -1,4 +1,6 @@
 # server/server.py
+# -*- coding: utf-8 -*-
+
 import os, uuid, json, smtplib, datetime
 from typing import Optional
 from email.mime.text import MIMEText
