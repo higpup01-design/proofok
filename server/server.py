@@ -1,6 +1,7 @@
 # server/server.py
-# -*- coding: utf-8 -*-
 
+# -*- coding: utf-8 -*-
+main
 import os, uuid, json, smtplib, datetime
 from typing import Optional
 from email.mime.text import MIMEText
@@ -70,7 +71,7 @@ def render_result(ok: bool, message: str = "", warning: str = "", token: str = "
 
 @app.route("/")
 def index():
-    return (f"ProofOK is running. Version: {VERSION} — try <a href='/healthz'>/healthz</a> or <a href='/routes'>/routes</a>", 200)
+    return (f"ProofOK is running. Version: {VERSION} â€” try <a href='/healthz'>/healthz</a> or <a href='/routes'>/routes</a>", 200)
 
 @app.get("/healthz")
 def healthz():
@@ -129,7 +130,7 @@ def api_respond(token):
              "viewer_name": viewer_name, "viewer_email": viewer_email, "ip": ip}
     rec["status"] = decision; rec["responses"].append(event); save_record(token, rec)
     proof_url = f"{BASE_URL}/proof/{token}"
-    subject = "[Proof] {} — {}".format(rec['original_name'], decision.upper())
+    subject = "[Proof] {} â€” {}".format(rec['original_name'], decision.upper())
     text = ("Proof decision received.\n\nFile: {}\nLink: {}\nDecision: {}\nName: {}\nEmail: {}\nComment:\n{}\n\n"
             "Time (UTC): {}\nIP: {}\n").format(rec['original_name'], proof_url, decision, viewer_name, viewer_email, comment, event['ts_utc'], event['ip'])
     html = ("""<h2>Proof decision received</h2>
@@ -171,7 +172,7 @@ def respond_form(token):
              "viewer_name":viewer_name,"viewer_email":viewer_email,"ip":ip}
     rec["status"]=decision; rec["responses"].append(event); save_record(token, rec)
     proof_url = f"{BASE_URL}/proof/{token}"
-    subject = "[Proof] {} — {}".format(rec['original_name'], decision.upper())
+    subject = "[Proof] {} â€” {}".format(rec['original_name'], decision.upper())
     text = ("Proof decision received.\n\nFile: {}\nLink: {}\nDecision: {}\nName: {}\nEmail: {}\nComment:\n{}\n\n"
             "Time (UTC): {}\nIP: {}\n").format(rec['original_name'], proof_url, decision, viewer_name, viewer_email, comment, event['ts_utc'], event['ip'])
     html = ("""<h2>Proof decision received</h2>
@@ -191,7 +192,7 @@ def respond_form(token):
             warning = "Email is sending in background (timeout {}s).".format(SMTP_TIMEOUT); app.logger.warning("[{}] Email send timed out; continuing.".format(VERSION))
         except Exception as e:
             warning = "Email send failed ({}:{}): {}".format(SMTP_HOST, SMTP_PORT, e); app.logger.exception("[{}] Email send failed".format(VERSION))
-    return render_result(True, "Thank you — your decision was recorded.", warning, token, rec["original_name"])
+    return render_result(True, "Thank you â€” your decision was recorded.", warning, token, rec["original_name"])
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
