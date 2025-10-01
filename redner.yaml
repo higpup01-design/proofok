@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: proofok
+    rootDir: server
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt && pip install gunicorn"
+    startCommand: "gunicorn server:app -w 2 -k gthread -b 0.0.0.0:$PORT"
+    autoDeploy: true

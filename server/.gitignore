@@ -1,0 +1,7 @@
+# at repo root
+server/.env
+server/uploads/
+server/data/
+*.pyc
+__pycache__/
+.venv/
