@@ -36,6 +36,10 @@ def load_record(token: str) -> dict:
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
+@app.get("/healthz")
+def healthz():
+    return {"ok": True, "version": "proofok-respond-v3", "time": ...}
+
 @app.route("/")
 def index():
     return redirect("https://colormagic.biz")
