@@ -1,9 +1,9 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Proof — {{ original_name }}</title>
+  <title>Proof � {{ original_name }}</title>
   <style>
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin:0; background:#0b0c10; color:#eaf0f1;}
     header { padding:16px 20px; background:#111820; position:sticky; top:0; z-index:10; display:flex; align-items:center; gap:16px; }
@@ -15,16 +15,15 @@
     .panel h2 { margin:0 0 8px 0; font-size:18px; }
     .field { margin:12px 0; }
     .field label { display:block; margin-bottom:6px; font-size:13px; color:#cfd8dc;}
-    .field input, .field textarea { width:100%; padding:10px; border-radius:10px; border:1px solid #2a3442; background:#0f1621; color:#eaf0f1; }
+    .field input, .field textarea, .field select { width:100%; padding:10px; border-radius:10px; border:1px solid #2a3442; background:#0f1621; color:#eaf0f1; }
     .row { display:flex; gap:10px; }
     .btns { display:flex; gap:10px; margin-top:10px; }
     .btn { padding:12px 14px; border-radius:12px; border:0; cursor:pointer; font-weight:700; }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
     .ok { background:#1f8a4c; color:white; }
     .rej { background:#c0392b; color:white; }
     .muted { color:#90a4ae; font-size:12px; }
     .success { background:#133b2f; color:#c6f7e2; padding:10px; border-radius:12px; display:none; margin-top:10px;}
-    .warning { background:#3b2f13; color:#f7e2c6; padding:10px; border-radius:12px; display:none; margin-top:10px; white-space:pre-wrap;}
+    .warning { background:#3b2f13; color:#f7e2c6; padding:10px; border-radius:12px; display:none; margin-top:10px;}
     @media (max-width: 900px) {
       main { grid-template-columns: 1fr; }
       .pdf-frame { height: 70vh; }
@@ -36,110 +35,75 @@
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M4 7h16M4 12h16M4 17h16" stroke="#66fcf1" stroke-width="2" stroke-linecap="round"/>
     </svg>
-    <h1>Color Magic — Proof: {{ original_name }}</h1>
+    <h1>Color Magic � Proof: {{ original_name }}</h1>
   </header>
 
   <main>
     <section class="pdf-frame">
       <iframe src="{{ pdf_url }}"></iframe>
     </section>
-
     <section class="panel">
       <h2>Approve / Reject</h2>
       <p class="muted">Please confirm the proof or tell us what needs to change.</p>
 
-      <!-- HTML fallback form (works even if JS is disabled) -->
-      <form id="fallback" action="/api/respond/{{ token }}" method="POST">
-        <input type="hidden" name="decision" id="fallback_decision" value="">
-        <div class="row">
-          <div class="field" style="flex:1;">
-            <label>Your name</label>
-            <input id="viewer_name" name="viewer_name" placeholder="Jane Doe">
-          </div>
-          <div class="field" style="flex:1;">
-            <label>Your email (optional)</label>
-            <input id="viewer_email" name="viewer_email" placeholder="jane@example.com">
-          </div>
+      <div class="row">
+        <div class="field" style="flex:1;">
+          <label>Your name</label>
+          <input id="viewer_name" placeholder="Jane Doe">
         </div>
-
-        <div class="field">
-          <label>Comments (required if rejecting)</label>
-          <textarea id="comment" name="comment" rows="6" placeholder="Type any corrections, spelling fixes, color changes, etc."></textarea>
+        <div class="field" style="flex:1;">
+          <label>Your email (optional)</label>
+          <input id="viewer_email" placeholder="jane@example.com">
         </div>
+      </div>
 
-        <div class="btns">
-          <button class="btn ok" type="button" onclick="submitDecision('approved')">OK to PRINT</button>
-          <button class="btn rej" type="button" onclick="submitDecision('rejected')">Reject</button>
-        </div>
+      <div class="field">
+        <label>Comments (required if rejecting)</label>
+        <textarea id="comment" rows="6" placeholder="Type any corrections, spelling fixes, color changes, etc."></textarea>
+      </div>
 
-        <div id="success" class="success">Thanks — we emailed your decision to the print team.</div>
-        <div id="warning" class="warning"></div>
+      <div class="btns">
+        <button class="btn ok" onclick="submitDecision('approved')">OK to PRINT</button>
+        <button class="btn rej" onclick="submitDecision('rejected')">Reject</button>
+      </div>
 
-        <p class="muted" style="margin-top:12px;">Token: {{ token }}</p>
-      </form>
+      <div id="success" class="success">Thanks � we emailed your decision to the print team.</div>
+      <div id="warning" class="warning"></div>
+
+      <p class="muted" style="margin-top:12px;">Token: {{ token }}</p>
     </section>
   </main>
 
   <script>
     async function submitDecision(decision) {
-      const form = document.getElementById('fallback');
-      const btns = form.querySelectorAll('.btn');
       const viewer_name = document.getElementById('viewer_name').value.trim();
       const viewer_email = document.getElementById('viewer_email').value.trim();
       const comment = document.getElementById('comment').value.trim();
-      const success = document.getElementById('success');
-      const warning = document.getElementById('warning');
 
-      success.style.display = 'none';
-      warning.style.display = 'none';
-      warning.textContent = '';
-
-      if (decision === 'rejected' && !comment) {
+      if (decision === 'rejected' && comment.length === 0) {
         alert('Please add a comment for a rejection.');
         return;
       }
 
-      // JS path: use fetch with cache-busting, else fall back to normal form POST
-      const url = `/api/respond/{{ token }}?t=${Date.now()}`;
-
-      // Disable buttons during submit
-      btns.forEach(b => b.disabled = true);
-
-      try {
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ decision, comment, viewer_name, viewer_email })
-        });
-
-        const raw = await res.text();
-        let data;
-        try { data = JSON.parse(raw); }
-        catch { throw new Error('Server returned non-JSON: ' + raw.slice(0, 200)); }
-
-        if (!res.ok || data.error) {
-          throw new Error(data.error || (res.status + ' ' + res.statusText));
-        }
-
-        success.style.display = 'block';
+      const res = await fetch(`${location.origin}/api/respond/{{ token }}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decision, comment, viewer_name, viewer_email })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        const s = document.getElementById('success');
+        s.style.display = 'block';
+        const w = document.getElementById('warning');
         if (data.warning) {
-          warning.textContent = data.warning;
-          warning.style.display = 'block';
+          w.textContent = data.warning;
+          w.style.display = 'block';
+        } else {
+          w.style.display = 'none';
         }
         window.scrollTo({ top: 0, behavior: 'smooth' });
-
-      } catch (err) {
-        // Fallback: try a classic form post (no JS)
-        try {
-          document.getElementById('fallback_decision').value = decision;
-          form.submit();
-        } catch (e) {
-          warning.textContent = 'Submit failed: ' + (err.message || err);
-          warning.style.display = 'block';
-          console.error(err);
-        }
-      } finally {
-        btns.forEach(b => b.disabled = false);
+      } else {
+        alert('Error: ' + (data.error || 'Unknown error'));
       }
     }
   </script>
